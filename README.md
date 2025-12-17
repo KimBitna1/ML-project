@@ -19,4 +19,4 @@ $$
 \mathrm{SOC}(t) = \mathrm{SOC}_0 - \frac{\eta \int_{t_0}^{t} i(t)\ dt}{Q_n}
 $$
 
-여기서 $$ \mathrm{SOC}_0 $$ 은 초기 SOC를 나타낸다. 
+여기서 $ \mathrm{SOC}_0 $ 은 초기 SOC를 나타낸다. 
