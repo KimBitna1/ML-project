@@ -83,6 +83,8 @@ SOC추정은 RPT 사이클을 제외한 모든 valid한 사이클에 대해 추�
 SOC 추정을 위해 사용한 입력 변수는 전압, 전류, 온도이다. 전압은 SOC와 가장 직접적인 관계를 가지는 물리량이며, 전류는 방전 상태와 부하 조건을 반영한다. 또한 배터리 내부 저항 및 전기화학 반응은 온도에 크게 의존하므로 온도를 입력변수로 포함하였다. 
 추가적인 신호 처리 없이 실제로 측정 가능한 기본적인 물리량만을 입력으로 사용하였다. 이는 실제 운용 환경에서의 적용 가능성을 고려한 선택이다. 
 
+### 3.1 basic model
+입력 변수로 전압, 전류, 온도만을 사용한 모델이다. 
 
 ```python
 import os
@@ -114,9 +116,11 @@ rpt_col   = "RPT_cycle"
 
 soc_col   = "SOC_shifted"
 
+-----------------------------------------------------------------------
+# 전체 파일 일기
+  # 파일을 모두 읽어서 각 row가 어느 파일에서 왔는지 표기한다.
+  # 이후 셀 단위로 train/test set을 구분할 것이다.
 
-# 파일을 모두 읽어서 각 row가 어느 파일에서 왔는지 표기한다.
-# 이후 셀 단위로 train/test set을 구분할 것이다. 
 def load_cells(data_dir, cell_names):
     dfs = []
     for cell in cell_names:
@@ -128,9 +132,11 @@ def load_cells(data_dir, cell_names):
 
 df = load_cells(DATA_DIR, vah_list)
 
+----------------------------------------------------------------------
+# SOC 추정 사이클만 mask
+  # SOC 추정을 할 사이클은 valid 한 사이클 중 RPT 사이클이 아닌 사이클이며, 
+  # discharge 구간에서만 SOC를 추정한다.
 
-# SOC 추정을 할 사이클은 valid 한 사이클 중 RPT 사이클이 아닌 사이클이며, 
-# discharge 구간에서만 SOC를 추정한다.
 mask = (
     (df[valid_col] == True) &
     (df[rpt_col] == False) &
@@ -142,12 +148,16 @@ dfd = df.loc[mask, use_cols].copy()
 dfd = dfd.dropna(subset=use_cols)
 dfd = dfd.sort_values(["cell_id", cycle_col, t_col])
 
+--------------------------------------------------------------------
+# SOC cliping
+  # 물리적으로 불가능한 SOC 이상치가 있을 경우를 대비하여 clip한다.
 
-# 혹시 물리적으로 불가능한 SOC 이상치가 있을 경우를 대비하여 clip한다.
 dfd[soc_col] = dfd[soc_col].astype(float).clip(0.0, 1.0)
 
+---------------------------------------------------------------------
+# 사이클 번호 재설정
+  # valid, non-RPT 사이클만 남긴 후 cycle number가 연속적으로 증가할 수 있도록 재설정한다.
 
-# valid, non-RPT 사이클만 남긴 후 cycle number가 연속적으로 증가할 수 있도록 재설정한다. 
 pairs = (
     dfd[["cell_id", cycle_col]]
     .drop_duplicates()
@@ -157,9 +167,10 @@ pairs["cycle_ml"] = pairs.groupby("cell_id").cumcount() + 1
 
 dfd = dfd.merge(pairs, on=["cell_id", cycle_col], how="left")
 
+------------------------------------------------------------------
+# training/test spliting
+  # 전체 20개의 파일 중, 20개를 랜덤하게 골라서 training에 사용한다.
 
-
-# 전체 20개의 파일 중, 20개를 랜덤하게 골라서 training에 사용한다. 
 all_cells = sorted(dfd["cell_id"].unique())
 rng = np.random.RandomState(42)
 
@@ -175,9 +186,10 @@ print("Test cells :", test_cells)
 print("Train rows :", len(train_df), " Test rows:", len(test_df))
 
 
+----------------------------------------------------------------
+# 모델 학습
+  # 입력은 전압, 전류, 온도를 사용한다.
 
-# 모델 학습:
-# 입력은 전압, 전류, 온도를 사용한다. 
 X_train = train_df[[v_col, i_col, temp_col]].to_numpy(dtype=float)
 y_train = train_df[soc_col].to_numpy(dtype=float)
 
@@ -200,8 +212,9 @@ rmse = np.sqrt(mean_squared_error(y_test, y_pred))
 print(f"Test MAE  = {mae:.5f}")
 print(f"Test RMSE = {rmse:.5f}")
 
-
+------------------------------------------------------------------
 # 각 파일 별 MAE
+
 test_df = test_df.copy()
 test_df["pred"] = y_pred
 cell_mae = (
@@ -212,7 +225,112 @@ cell_mae = (
 print("\nMAE by test cell:")
 print(cell_mae)
 ```
+----------------------------
 
-## 4. Results and Discussion
+### 3.2 Extended model
+
+입력 변수로 전압, 전류, 온도, 전압 변화율 (dV/dt), 시간 간격 (dt)를 고려한 모델이다.
+실제 배터리에서 측정되는 단자 전압에는 각 SOC에 따른 open circuit voltage (이상적인 단자 전압), ohmic resistance로 인한 내부 전압 강하, 과거 전류 히스토리에 따른 polarization이 모두 영향을 준다. 이를 고려하기 위하여 dV/dt를 입력변수로 설정하였다. dV/dt는 전압이 현재 어떻게 변하는지를 알려주는데, 예를 들어 dV/dt가 크다면 전압이 빠르게 떨어지는 있음을 뜻한다. 또한 본 프로젝트에서 사용한 데이터 분석 결과, 데이터의 측정 간격이 일정하지 않았음을 알 수 있었다. 따라서 입력 변수로 dt를 함께 줌으로써 전압의 변화율이 몇 초 동안 관측된 것인지 모델이 판단할 수 있도록 하였다. 
+
+아래의 코드는 3.1에서의 
+
+```python
+
+# 확인할 사이클의 사이클 넘버를 연속적으로.
+pairs = (
+    dfd[["cell_id", cycle_col]]
+    .drop_duplicates()
+    .sort_values(["cell_id", cycle_col])
+)
+pairs["cycle_ml"] = pairs.groupby("cell_id").cumcount() + 1
+
+dfd = dfd.merge(pairs, on=["cell_id", cycle_col], how="left")
+dfd = dfd.sort_values(["cell_id", "cycle_ml", t_col]).reset_index(drop=True)
+
+
+# 시간 중복된 측정이 있으면 dt=0이 생기기 때문에 dV/dt가 0이 될 수 있음. 
+# 따라서 중복된 측정이 있다면 제거. 
+dfd = dfd.drop_duplicates(subset=["cell_id", "cycle_ml", t_col], keep="first")
+
+
+# dV/dt를 고려하자. 
+grp = dfd.groupby(["cell_id", "cycle_ml"], sort=False)
+
+dfd["dt"] = grp[t_col].diff()
+dfd["dV"] = grp[v_col].diff()
+
+# dt==0 방지
+dfd["dt"] = dfd["dt"].replace(0, np.nan)
+
+dfd["dVdt"] = dfd["dV"] / dfd["dt"]
+
+# inf/NaN 처리: 각 cycle 첫 행은 NaN이므로 0으로
+dfd["dVdt"] = dfd["dVdt"].replace([np.inf, -np.inf], np.nan).fillna(0.0)
+dfd["dt"]   = dfd["dt"].fillna(0.0)
+
+# outlier가 있을 수 있으니까 방지하자
+dVdt_clip = 0.05  # V/s
+dt_clip   = 60.0  # s
+dfd["dVdt"] = dfd["dVdt"].clip(-dVdt_clip, dVdt_clip)
+dfd["dt"]   = dfd["dt"].clip(0.0, dt_clip)
+
+
+# 이전과 동일하게 train/test 셋 설정
+all_cells = sorted(dfd["cell_id"].unique())
+rng = np.random.RandomState(42)
+
+n_test = max(1, int(round(0.2 * len(all_cells))))  # 20개면 보통 4개
+test_cells = sorted(rng.choice(all_cells, size=n_test, replace=False))
+train_cells = [c for c in all_cells if c not in test_cells]
+
+train_df = dfd.loc[dfd["cell_id"].isin(train_cells)].copy()
+test_df  = dfd.loc[dfd["cell_id"].isin(test_cells)].copy()
+
+print("Train cells:", train_cells)
+print("Test cells :", test_cells)
+print("Train rows :", len(train_df), " Test rows:", len(test_df))
+
+
+# 모델 학습:
+# 입력 시 추가로 dV/dt와 dt를 고려한다.
+feat_cols = [v_col, i_col, temp_col, "dVdt", "dt"]
+
+X_train = train_df[feat_cols].to_numpy(dtype=float)
+y_train = train_df[soc_col].to_numpy(dtype=float)
+
+X_test  = test_df[feat_cols].to_numpy(dtype=float)
+y_test  = test_df[soc_col].to_numpy(dtype=float)
+
+model = RandomForestRegressor(
+    n_estimators=300,
+    random_state=42,
+    n_jobs=-1,
+    min_samples_leaf=3
+)
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+
+mae = mean_absolute_error(y_test, y_pred)
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+
+print(f"Test MAE  = {mae:.5f}")
+print(f"Test RMSE = {rmse:.5f}")
+
+# 셀 별 MAE
+test_df = test_df.copy()
+test_df["pred"] = y_pred
+
+cell_mae = (
+    test_df.groupby("cell_id")
+           .apply(lambda g: mean_absolute_error(g[soc_col].to_numpy(), g["pred"].to_numpy()))
+           .sort_values()
+)
+
+print("\nMAE by test cell:")
+print(cell_mae)
+
+
+# 4. Results and Discussion
 
 ## 5. reference
