@@ -351,5 +351,8 @@ print(cell_mae)
 
 3.1의 모델을 실행했을 때 결과는 다음과 같다. 
 
+![RF_basic](figures/RF_result0.png)
+
+
 
 ## 5. reference
