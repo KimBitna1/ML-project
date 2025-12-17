@@ -73,7 +73,7 @@ Baseline 조건을 기준으로 총 22개의 셀에 대해 실험이 수행되�
 
 ## 3. Model and Training step
 
-'''python
+```python
 import os
 import numpy as np
 import pandas as pd
