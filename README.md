@@ -353,6 +353,13 @@ print(cell_mae)
 
 ![RF_basic](figures/RF_result0.png)
 
+전체 test 셋에 대한 MAE와 RMSE를 구하고, 특히 각 셀에 대한 MAE를 나타내었다. 
+전체 MAE = 0.019, RMSE = 0.034이며, 
+Test cell (VAH25, 27, 02, 01)에 대한 MAE는 0.0079, 0.0080, 0.0198, 0.0216이다. 
 
+아래 그림은 각각 True SOC와 모델이 예측한 SOC 간의 산점도와, 한 사이클에서 실제 전류 적분으로 구한 SOC와 모델이 예측한 SOC를 그린 것이다. 
+
+![RF_basic](figures/RF_result1.png)
+![RF_basic](figures/RF_result2.png)
 
 ## 5. reference
