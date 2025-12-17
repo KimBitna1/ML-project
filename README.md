@@ -12,11 +12,12 @@ $$
 
 
   SOC를 정확하게 아는 것은 운행 가능 시간 예측, 시스템 제어, 안전 관리 등을 위해 중요하다. 
-그러나 실제 배터리 시스템에서 SOC를 직접적으로 측정할 수 없다. 배터리에서 실제로 측정 가능한 것은 전압, 전류, 온도이며, 이를 통해 우리는 SOC를 예측해야 한다. 
+그러나 실제 배터리 시스템에서 SOC를 직접적으로 측정할 수 없다. 배터리에서 실제로 측정 가능한 것은 전압(V), 전류(I), 온도(T)이며, 이를 통해 우리는 SOC를 예측해야 한다. 
 남아있는 capacity의 양은 충전 혹은 방전 동안 흐르는 전류를 적분함으로써 구할 수 있다. 따라서 SOC는 다음과 같은 식으로도 표현된다.
 
 $$
 \mathrm{SOC}(t) = \mathrm{SOC}_0 - \frac{\eta \int_{t_0}^{t} i(t)\ dt}{Q_n}
 $$
 
-여기서 $\mathrm{SOC}_0$ 은 initial SOC를, $\eta$는 efficiency factor를 나타낸다. 실제로는 배터리가 노화됨에 따라 $Q_n$ (i.e., 최대 가용 전하량)이 감소하고, charge/discharge rate, 온도, self-discharge, aging 등을 고려해서 보정해야 한다.
+여기서 $\mathrm{SOC}_0$ 은 initial SOC를, $i(t)$는 전류를 의미한다. $\eta$는 efficiency factor이며 배터리의 충방전 과정에서 발생하는 에너지 손실을 반영한다. 실제로 배터리가 노화됨에 따라 $Q_n$ (i.e., 최대 가용 전하량)이 감소하고, charge/discharge rate, 온도, self-discharge, aging 등의 요소 역시 SOC에 영향을 미치기 때문에 이러한 부분을 고려한 보정이 필요하다. 
+
