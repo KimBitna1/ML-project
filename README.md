@@ -230,13 +230,16 @@ print(cell_mae)
 ### 3.2 Extended model
 
 입력 변수로 전압, 전류, 온도, 전압 변화율 (dV/dt), 시간 간격 (dt)를 고려한 모델이다.
+
 실제 배터리에서 측정되는 단자 전압에는 각 SOC에 따른 open circuit voltage (이상적인 단자 전압), ohmic resistance로 인한 내부 전압 강하, 과거 전류 히스토리에 따른 polarization이 모두 영향을 준다. 이를 고려하기 위하여 dV/dt를 입력변수로 설정하였다. dV/dt는 전압이 현재 어떻게 변하는지를 알려주는데, 예를 들어 dV/dt가 크다면 전압이 빠르게 떨어지는 있음을 뜻한다. 또한 본 프로젝트에서 사용한 데이터 분석 결과, 데이터의 측정 간격이 일정하지 않았음을 알 수 있었다. 따라서 입력 변수로 dt를 함께 줌으로써 전압의 변화율이 몇 초 동안 관측된 것인지 모델이 판단할 수 있도록 하였다. 
 
-아래의 코드는 3.1에서의 
+아래의 코드는 3.1 코드와 사이클 넘버 재설정 부분 전까지는 동일하며, 그 이후 부분만을 작성하였다. 
+
 
 ```python
 
-# 확인할 사이클의 사이클 넘버를 연속적으로.
+# 사이클 번호 재설정
+
 pairs = (
     dfd[["cell_id", cycle_col]]
     .drop_duplicates()
@@ -248,34 +251,41 @@ dfd = dfd.merge(pairs, on=["cell_id", cycle_col], how="left")
 dfd = dfd.sort_values(["cell_id", "cycle_ml", t_col]).reset_index(drop=True)
 
 
-# 시간 중복된 측정이 있으면 dt=0이 생기기 때문에 dV/dt가 0이 될 수 있음. 
-# 따라서 중복된 측정이 있다면 제거. 
+-----------------------------------------------------------------------------------
+# 중복된 측정 제거
+  # 시간 중복된 측정이 있으면 dt=0이 생기기 때문에 dV/dt가 0이 될 수 있음. 
+  # 따라서 중복된 측정이 있다면 제거.
+
 dfd = dfd.drop_duplicates(subset=["cell_id", "cycle_ml", t_col], keep="first")
 
+-----------------------------------------------------------------------------
+# dV/dt 고려
 
-# dV/dt를 고려하자. 
 grp = dfd.groupby(["cell_id", "cycle_ml"], sort=False)
 
 dfd["dt"] = grp[t_col].diff()
 dfd["dV"] = grp[v_col].diff()
 
-# dt==0 방지
+
+  # dt==0 방지
 dfd["dt"] = dfd["dt"].replace(0, np.nan)
 
 dfd["dVdt"] = dfd["dV"] / dfd["dt"]
 
-# inf/NaN 처리: 각 cycle 첫 행은 NaN이므로 0으로
+
+  # inf/NaN 처리: 각 cycle 첫 행은 NaN이므로 0으로
 dfd["dVdt"] = dfd["dVdt"].replace([np.inf, -np.inf], np.nan).fillna(0.0)
 dfd["dt"]   = dfd["dt"].fillna(0.0)
 
-# outlier가 있을 수 있으니까 방지하자
+  # outlier 방지
 dVdt_clip = 0.05  # V/s
 dt_clip   = 60.0  # s
 dfd["dVdt"] = dfd["dVdt"].clip(-dVdt_clip, dVdt_clip)
 dfd["dt"]   = dfd["dt"].clip(0.0, dt_clip)
 
-
+---------------------------------------------------------------------------
 # 이전과 동일하게 train/test 셋 설정
+
 all_cells = sorted(dfd["cell_id"].unique())
 rng = np.random.RandomState(42)
 
@@ -291,8 +301,10 @@ print("Test cells :", test_cells)
 print("Train rows :", len(train_df), " Test rows:", len(test_df))
 
 
-# 모델 학습:
-# 입력 시 추가로 dV/dt와 dt를 고려한다.
+--------------------------------------------------------------------
+# 모델 학습
+# 입력 변수는 V, I, T, dV/dt, dt
+
 feat_cols = [v_col, i_col, temp_col, "dVdt", "dt"]
 
 X_train = train_df[feat_cols].to_numpy(dtype=float)
@@ -317,6 +329,7 @@ rmse = np.sqrt(mean_squared_error(y_test, y_pred))
 print(f"Test MAE  = {mae:.5f}")
 print(f"Test RMSE = {rmse:.5f}")
 
+-------------------------------------------------------------------------
 # 셀 별 MAE
 test_df = test_df.copy()
 test_df["pred"] = y_pred
@@ -329,6 +342,7 @@ cell_mae = (
 
 print("\nMAE by test cell:")
 print(cell_mae)
+```
 
 
 # 4. Results and Discussion
