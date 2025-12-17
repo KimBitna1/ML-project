@@ -345,6 +345,11 @@ print(cell_mae)
 ```
 
 
-# 4. Results and Discussion
+## 4. Results and Discussion
+
+### 4.1 basic model
+
+3.1의 모델을 실행했을 때 결과는 다음과 같다. 
+
 
 ## 5. reference
