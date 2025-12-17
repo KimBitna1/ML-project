@@ -19,4 +19,4 @@ $$
 \mathrm{SOC}(t) = \mathrm{SOC}_0 - \frac{\eta \int_{t_0}^{t} i(t)\ dt}{Q_n}
 $$
 
-여기서 $\mathrm{SOC}_0$ 은 initial SOC, $\eta$는 efficiency factor를 나타낸다. 
+여기서 $\mathrm{SOC}_0$ 은 initial SOC를, $\eta$는 efficiency factor를 나타낸다. 실제로는 배터리가 노화됨에 따라 $Q_n$ (i.e., 최대 가용 전하량)이 감소하고, charge/discharge rate, 온도, self-discharge, aging 등을 고려해서 보정해야 한다.
