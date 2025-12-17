@@ -60,7 +60,7 @@ Baseline 조건을 기준으로 총 22개의 셀에 대해 실험이 수행되�
 4) 충방전 시 들어오고 나간 전하량을 이용하여 각 사이클 별 SOC를 계산하였다.
 
 아래 사진은 전처리 이후 데이터셋의 모든 사이클에 대한 그래프이다.
-![VAH01 example](figures/VAH01,all.png)
+![VAH01 example](figures/VAH01_all.png)
 
 
 ## 3. Model and Training step
