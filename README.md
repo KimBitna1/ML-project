@@ -130,7 +130,7 @@ SOC 추정을 위해 사용한 기본적인 입력 변수는 전압, 전류, 온
 
 입력 변수를 다음 다섯 가지로 설정하였다. 
 - Voltage
-- Vurrent
+- Current
 - Temperature
 - dV/dt
 - dt
