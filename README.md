@@ -9,7 +9,7 @@
 이때 사용되는 대표적인 지표는 SOC (State of Charge)이다. 이는 배터리의 nominal capacity (정격 용량)에 대해 남아있는 capacity의 비로 나타낸다. SOC를 나타내는 식은 아래와 같다.
 
 $$ 
-\mathrm{SOC} = \frac{Q_\text{remaining}}{Q_\text{nominal}}          ------------(1)
+\mathrm{SOC} = \frac{Q_\text{remaining}}{Q_\text{nominal}}    ----  (1)
 $$
 
 
