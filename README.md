@@ -99,7 +99,7 @@ Input:
 -  Current (C)
 -  Temperature (T)
 
-[Click here to view the notebook](notebooks/basic_model.ipynb)
+[Click here to view the notebook](notebooks/Basic_model.ipynb)
 
 ----------------------------
 
