@@ -95,7 +95,7 @@ SOC 추정을 위해 사용한 입력 변수는 전압, 전류, 온도이다. �
 ### 3.1 basic model
 
 입력 변수를 다음 세 가지로 설정하였다. 가장 기본적으로 배터리 운용 시 측정할 수 있는 물리량이기 때문이다. 
--  voltage (V)
+-  Voltage (V)
 -  Current (C)
 -  Temperature (T)
 
@@ -105,13 +105,19 @@ SOC 추정을 위해 사용한 입력 변수는 전압, 전류, 온도이다. �
 
 ### 3.2 Extended model
 
-입력 변수로 전압, 전류, 온도, 전압 변화율 (dV/dt), 시간 간격 (dt)를 고려한 모델이다.
+입력 변수를 다음 다섯 가지로 설정하였다. 
+- Voltage
+- Vurrent
+- Temperature
+- dV/dt
+- dt
 
 실제 배터리에서 측정되는 단자 전압에는 각 SOC에 따른 open circuit voltage (이상적인 단자 전압), ohmic resistance로 인한 내부 전압 강하, 과거 전류 히스토리에 따른 polarization이 모두 영향을 준다. 이를 고려하기 위하여 전압이 현재 시점에서 어떻게 변화하는지를 모델이 학습하도록 dV/dt를 입력변수로 설정하였다.
 
 또한 본 프로젝트에서 사용한 데이터 분석 결과, 데이터의 측정 간격이 일정하지 않았음을 알 수 있었다. 따라서 입력 변수로 dt를 함께 줌으로써 전압의 변화율이 몇 초 동안 관측된 것인지 모델이 판단할 수 있도록 하였다. 
 
 
+[Click here to view the notebook](notebooks/Extended_model.ipynb)
 
 
 
