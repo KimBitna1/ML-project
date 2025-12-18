@@ -192,7 +192,9 @@ eVTOL의 이착륙 구간에서는 셀이 높은 출력을 요구받으며, 이�
 ## 5. Conclusion and Discussion
 본 프로젝트에서는 eVTOL 배터리의 사용 중 실시간 SOC 추정을 위하여 Random forest regressor을 이용한 머신러닝 모델을 구현하였다. 입력 변수에 따른 모델의 예측 성능 향상을 파악하기 위하여 basic model에서는 V, I, T를 입력 변수로 설정하였고, Extended model에서는 V, I, T, dV/dt, dt을 입력 변수로 설정하였다. 
 
-Basic model의 경우, eVTOL 배터리에서 급격한 전압 강하가 발생하는 이착륙 구간의 SOC 예측의 정확도가 떨어졌으나나, Extended model의 경우 이착륙 구간의 SOC를 비교적 정확하게 추정할 수 있었다. 
+Basic model의 경우, eVTOL 배터리에서 급격한 전압 강하가 발생하는 이착륙 구간의 SOC 예측의 정확도가 떨어졌으나, Extended model의 경우 이착륙 구간의 SOC를 Basic model에 비해 정확하게 추정할 수 있었다. 
+
+다만 여전히 SOC 추정에 오차가 발생하는 편이므로 향후 연구에서는 이러한 오차를 최소화 할 수 있는 eVTOL 배터리만의 새로운 모델링 기법의 개발이 필요하다. 
 
 
 향후 연구를 위한 제언은 다음과 같다.
@@ -208,3 +210,11 @@ Basic model의 경우, eVTOL 배터리에서 급격한 전압 강하가 발생�
    
 ---------------------------------------
 ## 6. reference
+
+1. Bills, Alexander, et al. "A battery dataset for electric vertical takeoff and landing aircraft." Scientific Data 10.1 (2023): 344.
+
+2. Zhang, Cheng, et al. "Online estimation of battery equivalent circuit model parameters and state of charge using decoupled least squares technique." Energy 142 (2018): 678-688.
+
+3. Wang, Baoji, et al. "Predicting battery degradation for electric vertical take-off and landing (eVTOL) aircraft: A comprehensive review of methods, challenges, and future trends." ETransportation (2025): 100477.
+
+   
