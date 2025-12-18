@@ -209,7 +209,7 @@ Basic model의 경우, eVTOL 배터리에서 급격한 전압 강하가 발생�
    해당 모델이 일반적인 EV 배터리 상황에서 어떤 결과를 보이는지 비교함으로써 eVTOL 배터리 내부 상태 추정에 있어서 정량적인 오차를 비교할 수 있을 것이다. 
    
 ---------------------------------------
-## 6. reference
+## 6. Reference
 
 1. Bills, Alexander, et al. "A battery dataset for electric vertical takeoff and landing aircraft." Scientific Data 10.1 (2023): 344.
 
