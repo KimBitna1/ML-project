@@ -73,6 +73,7 @@ eVTOL 배터리의 SOC는 전압, 전류, 온도에 대해 강한 비선형성�
 - Ns: cycle segment
 
 
+
 공개된 원시 데이터에 대한 자세한 설명은 아래 링크에서 확인할 수 있다. 
 
 https://kilthub.cmu.edu/articles/dataset/eVTOL_Battery_Dataset/14226830
