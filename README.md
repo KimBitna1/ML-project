@@ -86,7 +86,8 @@ https://kilthub.cmu.edu/articles/dataset/eVTOL_Battery_Dataset/14226830
 2) 측정에 오류가 있는 문제 사이클을 구분하고 valid_cycle 칼럼을 추가해 True/False로 표기하였다. 
 3) 실제 mission 사이클만 학습시키기 위해 PRT 사이클을 구분하고 RPT_cycle 칼럼을 추가해 True/False로 표기하였다.
 4) RPT 직후 사이클은 일반적인 mission 사이클과 진행 양상이 다르기 때문에, after_RPT 칼럼을 추가해 True/False로 표기하였다. 
-5) 충방전 시 들어오고 나간 전하량을 이용하여 SOC를 계산하였다. (전류 적분 SOC)
+5) 충방전 시 들어오고 나간 전하량을 이용하여 SOC를 계산하고 SOC 칼럼을 추가하였다.
+6) 데이터 측정 과정에서 발생한 SOC의 오류를 보정하여 SOC_shifted 칼럼을 추가하였다.
    
 
 
